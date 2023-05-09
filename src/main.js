@@ -20,6 +20,7 @@ let borderPadding = borderUISize / 10;
 
 let PlayButton, Ready;
 
-let runSpeed = 4;
+let runSpeed = 5;
+let jumpForce = 700;
 
-let keyJump, keyAttack, keyDown, keyEscape;
+let keyJump, keyAttack, keyDown, keyEscape, keyR;

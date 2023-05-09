@@ -26,7 +26,7 @@ class Menu extends Phaser.Scene {
 
         // show menu text
         this.add.text(game.config.width/2, game.config.height/2 - borderUISize * 4 - borderPadding, 'DOOM PATROL', menuConfig).setOrigin(0.5);
-        let tutorialText = this.add.text(game.config.width/2, game.config.height/2 + borderUISize, 'RUN FOR YOUR LIFE!\nSpace to jump', menuConfig).setOrigin(0.5);
+        let tutorialText = this.add.text(game.config.width/2, game.config.height/2 + borderUISize, 'RUN FOR YOUR LIFE!\nSpace to jump\nEsc to return to menu', menuConfig).setOrigin(0.5);
         menuConfig.backgroundColor = '#00FF00';
         const PlayButton = this.add.text(game.config.width/2, game.config.height/2 + borderUISize * 6, 'PLAY', menuConfig).setOrigin(0.5).setInteractive();
         Ready = false;
