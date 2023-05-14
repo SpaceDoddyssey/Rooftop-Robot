@@ -25,8 +25,6 @@ class Play extends Phaser.Scene {
         }
 
         keyJump   = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
-        keyAttack = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.F);
-        keyDown   = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S);
         keyR      = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.R);
         keyEscape = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
 
@@ -239,7 +237,6 @@ class Play extends Phaser.Scene {
         var yPos = Phaser.Math.Between(game.config.height / 2 - 100, game.config.height / 2 + 50);
         var spike = this.physics.add.sprite(game.config.width + 5, yPos, 'spikeball').setOrigin(0.5, 0.5);
         spike.body.setCircle(150);
-        //spike.body.setSize(spike.width, spike.height).
         spike.scale = 0.1;
         this.spikes.push(spike);
         this.spikeTimer = Phaser.Math.Between(200 - this.difficultyScalar, 300 - this.difficultyScalar * 2);
