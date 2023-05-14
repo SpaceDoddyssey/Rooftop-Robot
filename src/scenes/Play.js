@@ -6,18 +6,23 @@ class Play extends Phaser.Scene {
     preload(){
         this.load.path = 'assets/';
         this.load.image('player',     'player.png')
-        this.load.image('coin',       'cookie.png')
+        this.load.image('coin',       'coin.png')
         this.load.image('background', 'background.png')
         this.load.image('building',   'building.png')
+        this.load.image('spikeball',  'spikeball.png')
+        this.load.image('heart',      'heart.png')
     }
     
     create() {
-        if (game.settings.audioPlaying == false) {
-            // let backgroundMusic = this.sound.add('sfx_lobby');
-            // backgroundMusic.loop = true;
-            // //backgroundMusic.play();
-            // game.settings.audioPlaying = true;
+        if(game.settings.audioPlaying == false){
+            this.bgm = this.sound.add('sfx_music', {volume: 0.1});
+            this.bgm.loop = true;
+            this.bgm.play();
+            game.settings = {
+                audioPlaying: true
+            }
         }
+
         keyJump   = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
         keyAttack = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.F);
         keyDown   = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S);
@@ -66,14 +71,17 @@ class Play extends Phaser.Scene {
         this.background.tileScale = 0.5;
         this.background.setDepth(-100);
 
+        //arrays and timers 
         this.coins = [];
         this.coinTimer = 50;
         this.buildings = [];
         this.buildingTimer = 0
+        this.spikes = [];
+        this.spikeTimer = 25;
 
         this.buildingGroup = this.physics.add.group();
         this.startBuilding = this.physics.add.sprite(600, game.config.height + 200, 'building').setOrigin(0.5, 0.5);
-        this.startBuilding.scale = 1.5;
+        this.startBuilding.scale = 1;
         this.startBuilding.setPushable(false);
         this.buildingGroup.add(this.startBuilding);
         this.buildings.push(this.startBuilding);
@@ -84,21 +92,44 @@ class Play extends Phaser.Scene {
         this.player.body.gravity.y = 1000;
         this.player.setPushable(true);
         this.physics.add.collider(this.player, this.buildingGroup);
+
+        this.hearts = [];
+        for(let i = 0; i < 3; i++){
+            let heart = this.add.sprite(borderUISize * (3 + (i * 6)), 80, 'heart').setOrigin(0.5, 0.5);
+            heart.scale = 0.1;
+            this.hearts.push (heart);
+        }
+
+        this.physicsTimer = 0;
+        this.pointsTimer = 0;
+        this.difficultyScalar = 0;
+        this.difficultyTimer = 0;
     }
 
     update() {
         if (this.gameOver && Phaser.Input.Keyboard.JustDown(keyR)) {
+            //this.game.sound.stopAll();
             this.scene.restart();
         }
         if (Phaser.Input.Keyboard.JustDown(keyEscape)) {
             this.game.sound.stopAll();
+            game.settings = {
+                audioPlaying: false
+            }
             this.scene.start("menuScene");
         }
 
         if(!this.gameOver){
             if(this.player.y >= game.config.height + 100){
                 this.GameOver();
+                this.sound.play('sfx_fall');
             } 
+
+            this.pointsTimer++;
+            if(this.pointsTimer >= pointsRate){
+                this.addScore(1);
+                this.pointsTimer = 0;
+            }
 
             this.background.tilePositionX += runSpeed / 2;
 
@@ -108,7 +139,16 @@ class Play extends Phaser.Scene {
                 this.physics.overlap(this.player, coin, (player, collided) => {
                     coin.destroy();
                     collided.destroy();
-                    this.addScore(1);
+                    this.addScore(5);
+                    this.sound.play('sfx_coin');
+                }, null, this);
+            });
+            this.spikes.forEach(spike => {
+                spike.x -= runSpeed;
+                if(spike.x <= -spike.width) { spike.destroy(); }
+                this.physics.overlap(this.player, spike, (player, collided) => {
+                    collided.destroy();
+                    this.takeDamage();
                 }, null, this);
             });
             this.buildings.forEach(building => {
@@ -120,19 +160,34 @@ class Play extends Phaser.Scene {
             }
 
             this.coinTimer--;
-            if(this.coinTimer <= 0){
-                this.spawnCoin();
-            }
-            
+            if(this.coinTimer <= 0){ this.spawnCoin(); }
             this.buildingTimer--;        
-            if(this.buildingTimer <= 0){
-                this.spawnBuilding();
+            if(this.buildingTimer <= 0){ this.spawnBuilding();}
+            this.spikeTimer--;        
+            if(this.spikeTimer <= 0){ this.spawnSpike();}
+            this.difficultyTimer--;
+            if(this.difficultyTimer <= 0){
+                if(this.difficultyScalar < 120){
+                    this.difficultyScalar++;
+                }
+                this.difficultyTimer = 40; 
             }
+        }
+    }
+
+    takeDamage(){
+        this.sound.play('sfx_hurt');
+        console.log(this.hearts.length);
+        let heart = this.hearts.pop();
+        heart.destroy();
+        if(this.hearts.length === 0){
+            this.GameOver();    
         }
     }
 
     GameOver(){
         this.gameOver = true;
+        this.hearts.forEach(element => { element.destroy(); });
         let menuConfig = {
             fontFamily: 'Courier',
             fontSize: '28px',
@@ -156,11 +211,19 @@ class Play extends Phaser.Scene {
 
     spawnCoin(){
         var yPos = Phaser.Math.Between(game.config.height / 2 - 100, game.config.height / 2 + 50);
-        var coin = this.physics.add.sprite(game.config.width + 5, yPos, 'coin');
-        coin.scale = 0.08;
-        //coin.body.gravity.y = 0;
+        var coin = this.physics.add.sprite(game.config.width + 5, yPos, 'coin').setOrigin(0.5, 0.5);
+        coin.scale = 0.3;
         this.coins.push(coin);
         this.coinTimer = Phaser.Math.Between(100, 300);
+    }
+    spawnSpike(){
+        var yPos = Phaser.Math.Between(game.config.height / 2 - 100, game.config.height / 2 + 50);
+        var spike = this.physics.add.sprite(game.config.width + 5, yPos, 'spikeball').setOrigin(0.5, 0.5);
+        spike.body.setCircle(150);
+        //spike.body.setSize(spike.width, spike.height).
+        spike.scale = 0.1;
+        this.spikes.push(spike);
+        this.spikeTimer = Phaser.Math.Between(200 - this.difficultyScalar, 300 - this.difficultyScalar * 2);
     }
 
     spawnBuilding(){
@@ -170,7 +233,7 @@ class Play extends Phaser.Scene {
         building.setPushable(false);
         this.buildings.push(building);
         this.physics.collide(this.player, building);
-        this.buildingTimer = Phaser.Math.Between(200, 200);
+        this.buildingTimer = 200;
         this.buildingGroup.add(building);
     }
 }

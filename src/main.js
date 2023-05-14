@@ -1,6 +1,6 @@
 let config = {
     type: Phaser.CANVAS,
-    width: window.innerWidth - 100,
+    width: 960,
     height: 480,
     physics: {
         default: 'arcade',
@@ -22,5 +22,6 @@ let PlayButton, Ready;
 
 let runSpeed = 5;
 let jumpForce = 700;
+let pointsRate = 10;
 
 let keyJump, keyAttack, keyDown, keyEscape, keyR;
