@@ -11,11 +11,12 @@ class Play extends Phaser.Scene {
         this.load.image('building',   'building.png')
         this.load.image('spikeball',  'spikeball.png')
         this.load.image('heart',      'heart.png')
+        this.load.atlas('playerSpritesheet', 'playerSpritesheet.png', 'playerSpritesheet.json');
     }
     
     create() {
         if(game.settings.audioPlaying == false){
-            this.bgm = this.sound.add('sfx_music', {volume: 0.1});
+            this.bgm = this.sound.add('sfx_music', {volume: 0.2});
             this.bgm.loop = true;
             this.bgm.play();
             game.settings = {
@@ -43,7 +44,7 @@ class Play extends Phaser.Scene {
         this.playAreaRightPad = 35;
 
         // Text configs
-        const scoreConfig = {
+        let scoreConfig = {
             fontFamily: 'Courier',
             fontSize: '28px',
             backgroundColor: '#F3B141',
@@ -55,16 +56,18 @@ class Play extends Phaser.Scene {
                 left: 5,
                 right: 5
             },
-            fixedWidth: 170,
+            fixedWidth: 175,
             setDepth: 0
         }
         const gameOverConfig = Object.assign({}, scoreConfig, { fontSize: '56px', align: 'center', fixedWidth: 375 });
         const restartConfig  = Object.assign({}, scoreConfig, { align: 'center', fixedWidth: 380 });
+        const highScoreConfig= Object.assign({}, scoreConfig, { fixedWidth: 260 });
 
         //Initialize score
         this.gameOver = false;
         this.score = 0;
         this.totalScore = this.add.text(borderUISize + borderPadding, borderUISize + borderPadding, 'Score: ' + this.score, scoreConfig);
+        this.highScoreText = this.add.text(game.config.width-borderPadding-borderUISize-highScoreConfig.fixedWidth, borderUISize + borderPadding*2, "High Score:"+highScore, highScoreConfig);
 
         //Spawn the background
         this.background = this.add.tileSprite(0, 0, game.config.width * 2, 0, 'background').setOrigin(0, 0);
@@ -87,11 +90,23 @@ class Play extends Phaser.Scene {
         this.buildings.push(this.startBuilding);
 
         //Spawn the player
-        this.player = this.physics.add.sprite(80, game.config.height/2, 'player').setOrigin(0.5);
-        this.player.scale = 0.12;
+        this.player = this.physics.add.sprite(80, game.config.height/2, 'playerSpritesheet').setOrigin(0.5);
+        this.player.scale = 0.18;
         this.player.body.gravity.y = 1000;
         this.player.setPushable(true);
         this.physics.add.collider(this.player, this.buildingGroup);
+        this.anims.create({
+            key: 'rolling',
+            frames: this.anims.generateFrameNames('playerSpritesheet', {
+                prefix: 'player',
+                start: 0,
+                end: 7,
+            }),
+            defaultTextureKey: 'player',
+            frameRate: 15,
+            repeat: -1
+        });
+        this.player.anims.play('rolling');
 
         this.hearts = [];
         for(let i = 0; i < 3; i++){
@@ -139,7 +154,7 @@ class Play extends Phaser.Scene {
                 this.physics.overlap(this.player, coin, (player, collided) => {
                     coin.destroy();
                     collided.destroy();
-                    this.addScore(5);
+                    this.addScore(20);
                     this.sound.play('sfx_coin');
                 }, null, this);
             });
@@ -207,6 +222,10 @@ class Play extends Phaser.Scene {
     addScore(amount){
         this.score += amount;
         this.totalScore.text = 'Score: ' + this.score;
+        if(this.score > highScore){
+            highScore = this.score;
+            this.highScoreText.text = 'High Score: ' + highScore;
+        }
     }
 
     spawnCoin(){

@@ -5,7 +5,7 @@ let config = {
     physics: {
         default: 'arcade',
         arcade: {
-            debug: true,
+            debug: false,
         }
     },
     scene: [ Menu, Play ]
@@ -23,5 +23,6 @@ let PlayButton, Ready;
 let runSpeed = 5;
 let jumpForce = 700;
 let pointsRate = 10;
+let highScore = 0;
 
 let keyJump, keyAttack, keyDown, keyEscape, keyR;

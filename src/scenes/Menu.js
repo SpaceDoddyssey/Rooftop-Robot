@@ -31,9 +31,9 @@ class Menu extends Phaser.Scene {
         Ready = false;
 
         // show menu text
-        let titleText = this.add.text(game.config.width/2, game.config.height/2 - borderUISize * 6 - borderPadding, 'DOOM PATROL', menuConfig).setOrigin(0.5);
-        let tutorialText = this.add.text(game.config.width/2, game.config.height/2 - borderUISize, 'RUN FOR YOUR LIFE!\nSpace to jump\nEsc to return to menu', menuConfig).setOrigin(0.5);
-        let creditsText = this.add.text(game.config.width/2, game.config.height/2 + borderUISize * 14, 'All art and coding by Cameron Dodd\nSound effects generated with https://sfxr.me/\nMusic courtesy of Youtube Audio Library', menuConfig).setOrigin(0.5);
+        let titleText = this.add.text(game.config.width/2, game.config.height/2 - borderUISize * 6 - borderPadding, 'ROOFTOP ROBOT', menuConfig).setOrigin(0.5);
+        let tutorialText = this.add.text(game.config.width/2, game.config.height/2 - borderUISize, 'Collect coins, avoid spikes, don\'t fall\nSpace to jump, Esc to return to menu', menuConfig).setOrigin(0.5);
+        let creditsText = this.add.text(game.config.width/2, game.config.height/2 + borderUISize * 12, 'All art and coding by Cameron Dodd\nSound effects generated with https://sfxr.me/\nMusic courtesy of Youtube Audio Library\nFalling sfx from https://www.soundfishing.eu/', menuConfig).setOrigin(0.5);
         menuConfig.backgroundColor = '#00FF00';
         const PlayButton = this.add.text(game.config.width/2, game.config.height/2 + borderUISize * 6, 'PLAY', menuConfig).setOrigin(0.5).setInteractive();
         
